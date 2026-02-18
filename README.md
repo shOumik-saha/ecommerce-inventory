@@ -1,59 +1,189 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Ecommerce Inventory
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-stack inventory management application with:
 
-## About Laravel
+- Laravel 12 REST API (JWT authentication)
+- Next.js 16 frontend dashboard
+- Product and category CRUD
+- Pagination, search, and filtering
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Backend: PHP 8.2, Laravel 12, `tymon/jwt-auth`
+- Frontend: Next.js 16, React 19, TypeScript
+- Database: PostgreSQL recommended
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Note: Product search in `app/Repositories/ProductRepository.php` uses `ILIKE`, which is PostgreSQL-specific.
 
-## Learning Laravel
+## Monorepo Structure
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```text
+.
+|-- app/                     # Laravel backend source
+|-- routes/api.php           # API routes
+|-- database/migrations/     # DB schema
+|-- frontend/                # Next.js frontend app
+|   |-- src/app/             # App Router pages
+|   |-- src/utils/fetcher.ts # API client helper
+|-- docs/openapi.yaml        # Swagger/OpenAPI spec
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Features
 
-## Laravel Sponsors
+- JWT-based auth: register, login, me, refresh, logout
+- Products:
+  - list (paginated)
+  - filter by category/search
+  - create/update/delete (auth protected)
+- Categories:
+  - list (paginated)
+  - create/update/delete (auth protected)
+- Frontend dashboard with:
+  - auth-aware root redirect (`/` -> `/dashboard` or `/login`)
+  - products/categories management pages
+  - custom delete confirmation modal and success toast
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## API Base URLs
 
-### Premium Partners
+- Local backend: `http://localhost:8000/api`
+- Production backend (example): `https://ecommerce-inventory-production.up.railway.app/api`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## API Documentation (Swagger/OpenAPI)
 
-## Contributing
+OpenAPI spec is available at:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- `docs/openapi.yaml`
 
-## Code of Conduct
+Use with:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. https://editor.swagger.io (import/paste `docs/openapi.yaml`)
+2. Or VS Code OpenAPI extension for local preview
 
-## Security Vulnerabilities
+## Local Setup
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 1) Backend (Laravel)
 
-## License
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Set DB values in `.env` and run:
+
+```bash
+php artisan migrate
+php artisan serve
+```
+
+Backend runs on `http://localhost:8000`.
+
+### 2) Frontend (Next.js)
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+Run:
+
+```bash
+npm run dev
+```
+
+Frontend runs on `http://localhost:3000`.
+
+## Environment Variables
+
+### Backend (`.env` / Railway Variables)
+
+- `APP_ENV`
+- `APP_URL`
+- `DB_*`
+- `JWT_SECRET`
+- `CORS_ALLOWED_ORIGINS`
+- `CORS_ALLOWED_ORIGINS_PATTERNS`
+
+Recommended CORS values:
+
+```env
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://YOUR-PROD-VERCEL-DOMAIN.vercel.app
+CORS_ALLOWED_ORIGINS_PATTERNS=#^https://.*\.vercel\.app$#
+```
+
+After changing config in production:
+
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+### Frontend (Vercel / `.env.local`)
+
+- `NEXT_PUBLIC_API_URL` (must point to backend `/api` base URL)
+
+## Deployment
+
+### Backend (Railway)
+
+1. Deploy this repo as Laravel service.
+2. Set backend env variables (DB, JWT, CORS).
+3. Ensure migrations are run.
+4. Confirm API health: `GET /api/products`.
+
+### Frontend (Vercel)
+
+1. Import the same repository.
+2. Set **Root Directory** to `frontend`.
+3. Add env:
+   - `NEXT_PUBLIC_API_URL=https://<your-backend>/api`
+4. Deploy.
+
+## Authentication
+
+Protected endpoints require:
+
+```http
+Authorization: Bearer <jwt_token>
+```
+
+Token is returned by:
+
+- `POST /api/register`
+- `POST /api/login`
+
+## API Endpoints (Summary)
+
+Auth:
+
+- `POST /api/register`
+- `POST /api/login`
+- `GET /api/me` (auth)
+- `POST /api/refresh` (auth)
+- `POST /api/logout` (auth)
+
+Products:
+
+- `GET /api/products`
+- `GET /api/products/search?q=...`
+- `GET /api/products/{id}`
+- `POST /api/products` (auth)
+- `PUT /api/products/{id}` (auth)
+- `DELETE /api/products/{id}` (auth)
+
+Categories:
+
+- `GET /api/categories`
+- `GET /api/categories/{id}`
+- `POST /api/categories` (auth)
+- `PUT /api/categories/{id}` (auth)
+- `DELETE /api/categories/{id}` (auth)
+
+
