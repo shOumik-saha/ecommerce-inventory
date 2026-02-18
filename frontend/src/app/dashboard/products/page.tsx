@@ -71,6 +71,8 @@ export default function ProductsPage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   const pageWindow = useMemo(
     () => getPageWindow(pagination.currentPage, pagination.lastPage),
@@ -206,15 +208,20 @@ export default function ProductsPage() {
     setError("");
   };
 
-  const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Delete this product?");
-    if (!confirmed) return;
+  const handleDeleteRequest = (id: number) => {
+    setConfirmDeleteId(id);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!confirmDeleteId) return;
     setError("");
     setStatus("");
     try {
-      await apiFetch(`/products/${id}`, { method: "DELETE" });
+      await apiFetch(`/products/${confirmDeleteId}`, { method: "DELETE" });
       setStatus("Product deleted successfully.");
+      setShowDeleteToast(true);
+      setTimeout(() => setShowDeleteToast(false), 2500);
+      setConfirmDeleteId(null);
       await fetchProducts(pagination.currentPage);
     } catch (err) {
       console.error(err);
@@ -444,7 +451,7 @@ export default function ProductsPage() {
                               <button
                                 className={`${styles.btn} ${styles.btnDanger}`}
                                 type="button"
-                                onClick={() => handleDelete(product.id)}
+                                onClick={() => handleDeleteRequest(product.id)}
                               >
                                 Delete
                               </button>
@@ -491,6 +498,33 @@ export default function ProductsPage() {
           </article>
         </section>
       </div>
+
+      {confirmDeleteId ? (
+        <div className={styles.overlay}>
+          <div className={styles.dialog}>
+            <h3 className={styles.dialogTitle}>Delete Product?</h3>
+            <p className={styles.dialogBody}>This action cannot be undone.</p>
+            <div className={styles.actionsRow}>
+              <button className={`${styles.btn} ${styles.btnDanger}`} type="button" onClick={handleDeleteConfirm}>
+                Yes, Delete
+              </button>
+              <button
+                className={`${styles.btn} ${styles.btnSoft}`}
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showDeleteToast ? (
+        <div className={styles.toastWrap}>
+          <div className={`${styles.toast} ${styles.toastSuccess}`}>Product deleted successfully</div>
+        </div>
+      ) : null}
     </main>
   );
 }

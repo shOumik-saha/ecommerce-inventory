@@ -54,6 +54,8 @@ export default function CategoriesPage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   const pageWindow = useMemo(
     () => getPageWindow(pagination.currentPage, pagination.lastPage),
@@ -169,15 +171,20 @@ export default function CategoriesPage() {
     setStatus("");
   };
 
-  const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Delete this category?");
-    if (!confirmed) return;
+  const handleDeleteRequest = (id: number) => {
+    setConfirmDeleteId(id);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!confirmDeleteId) return;
     setError("");
     setStatus("");
     try {
-      await apiFetch(`/categories/${id}`, { method: "DELETE" });
+      await apiFetch(`/categories/${confirmDeleteId}`, { method: "DELETE" });
       setStatus("Category deleted successfully.");
+      setShowDeleteToast(true);
+      setTimeout(() => setShowDeleteToast(false), 2500);
+      setConfirmDeleteId(null);
       await fetchCategories(pagination.currentPage);
     } catch (err) {
       console.error(err);
@@ -357,7 +364,7 @@ export default function CategoriesPage() {
                               <button
                                 className={`${styles.btn} ${styles.btnDanger}`}
                                 type="button"
-                                onClick={() => handleDelete(category.id)}
+                                onClick={() => handleDeleteRequest(category.id)}
                               >
                                 Delete
                               </button>
@@ -404,6 +411,33 @@ export default function CategoriesPage() {
           </article>
         </section>
       </div>
+
+      {confirmDeleteId ? (
+        <div className={styles.overlay}>
+          <div className={styles.dialog}>
+            <h3 className={styles.dialogTitle}>Delete Category?</h3>
+            <p className={styles.dialogBody}>This action cannot be undone.</p>
+            <div className={styles.actionsRow}>
+              <button className={`${styles.btn} ${styles.btnDanger}`} type="button" onClick={handleDeleteConfirm}>
+                Yes, Delete
+              </button>
+              <button
+                className={`${styles.btn} ${styles.btnSoft}`}
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showDeleteToast ? (
+        <div className={styles.toastWrap}>
+          <div className={`${styles.toast} ${styles.toastSuccess}`}>Category deleted successfully</div>
+        </div>
+      ) : null}
     </main>
   );
 }
