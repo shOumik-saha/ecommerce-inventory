@@ -216,7 +216,8 @@
 }
 
 .kpi {
-  margin: 0;
+  margin: 14px 0 12px;
+  padding-top: 2px;
   color: #4a6786;
   font-weight: 700;
 }

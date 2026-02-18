@@ -37,13 +37,6 @@ interface ProductForm {
   category_id: string;
 }
 
-interface Filters {
-  search: string;
-  category: string;
-  minPrice: string;
-  maxPrice: string;
-}
-
 const emptyForm: ProductForm = {
   name: "",
   description: "",
@@ -67,12 +60,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
-  const [filters, setFilters] = useState<Filters>({
-    search: "",
-    category: "",
-    minPrice: "",
-    maxPrice: "",
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -87,6 +76,19 @@ export default function ProductsPage() {
     () => getPageWindow(pagination.currentPage, pagination.lastPage),
     [pagination.currentPage, pagination.lastPage]
   );
+
+  const visibleProducts = useMemo(() => {
+    return products.filter((product) => {
+      const search = searchTerm.trim().toLowerCase();
+      const matchesSearch =
+        !search ||
+        product.name.toLowerCase().includes(search) ||
+        (product.description || "").toLowerCase().includes(search);
+
+      const matchesCategory = !categoryFilter || String(product.category_id) === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, categoryFilter]);
 
   const fetchAllCategories = async () => {
     const all: CategoryOption[] = [];
@@ -104,14 +106,9 @@ export default function ProductsPage() {
     setCategories(all);
   };
 
-  const fetchProducts = async (page = 1, appliedFilters: Filters = filters) => {
+  const fetchProducts = async (page = 1) => {
     const params = new URLSearchParams();
     params.set("page", String(page));
-
-    if (appliedFilters.search.trim()) params.set("search", appliedFilters.search.trim());
-    if (appliedFilters.category) params.set("category", appliedFilters.category);
-    if (appliedFilters.minPrice) params.set("min_price", appliedFilters.minPrice);
-    if (appliedFilters.maxPrice) params.set("max_price", appliedFilters.maxPrice);
 
     const res = await apiFetch(`/products?${params.toString()}`);
     const payload: Paginated<Product> = res.data;
@@ -146,29 +143,6 @@ export default function ProductsPage() {
 
     init();
   }, [router]);
-
-  const handleFilterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await fetchProducts(1);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to apply filters.");
-    }
-  };
-
-  const handleClearFilters = async () => {
-    const cleared = { search: "", category: "", minPrice: "", maxPrice: "" };
-    setFilters(cleared);
-    setError("");
-    try {
-      await fetchProducts(1, cleared);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to reset filters.");
-    }
-  };
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -396,15 +370,15 @@ export default function ProductsPage() {
             <div className={styles.col7}>
               <h2 className={styles.sectionTitle}>All Products</h2>
 
-              <form className={styles.formGrid} onSubmit={handleFilterSubmit}>
+              <div className={styles.formGrid}>
                 <label className={styles.label} htmlFor="search">
                   Search
                 </label>
                 <input
                   id="search"
                   className={styles.input}
-                  value={filters.search}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search by name/description"
                 />
 
@@ -414,8 +388,8 @@ export default function ProductsPage() {
                 <select
                   id="filter-category"
                   className={styles.select}
-                  value={filters.category}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
                 >
                   <option value="">All categories</option>
                   {categories.map((cat) => (
@@ -424,45 +398,11 @@ export default function ProductsPage() {
                     </option>
                   ))}
                 </select>
-
-                <label className={styles.label} htmlFor="min-price">
-                  Min Price
-                </label>
-                <input
-                  id="min-price"
-                  className={styles.input}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={filters.minPrice}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
-                />
-
-                <label className={styles.label} htmlFor="max-price">
-                  Max Price
-                </label>
-                <input
-                  id="max-price"
-                  className={styles.input}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
-                />
-
-                <div className={`${styles.actionsRow} ${styles.span2}`}>
-                  <button className={`${styles.btn} ${styles.btnPrimary}`} type="submit">
-                    Apply
-                  </button>
-                  <button className={`${styles.btn} ${styles.btnSoft}`} type="button" onClick={handleClearFilters}>
-                    Reset
-                  </button>
-                </div>
-              </form>
+              </div>
 
               <p className={styles.kpi}>
-                Showing <strong>{products.length}</strong> items | Total <strong>{pagination.total}</strong>
+                Showing <strong>{visibleProducts.length}</strong> items on page {pagination.currentPage} | Total{" "}
+                <strong>{pagination.total}</strong>
               </p>
 
               <div className={styles.tableWrap}>
@@ -477,12 +417,12 @@ export default function ProductsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.length === 0 ? (
+                    {visibleProducts.length === 0 ? (
                       <tr>
                         <td colSpan={5}>No products found.</td>
                       </tr>
                     ) : (
-                      products.map((product) => (
+                      visibleProducts.map((product) => (
                         <tr key={product.id}>
                           <td>
                             <strong>{product.name}</strong>
