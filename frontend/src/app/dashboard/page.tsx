@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/utils/fetcher";
 import styles from "./dashboard.module.css";
 
@@ -19,10 +20,12 @@ const getTotal = (res: any): number => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [username, setUsername] = useState("User");
   const [productsTotal, setProductsTotal] = useState(0);
   const [categoriesTotal, setCategoriesTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -54,6 +57,22 @@ export default function Dashboard() {
     fetchData();
   }, [router]);
 
+  const handleLogout = async () => {
+    setError("");
+    setIsLoggingOut(true);
+
+    try {
+      await apiFetch("/logout", { method: "POST" });
+      logout();
+      router.push("/login");
+    } catch (err) {
+      console.error(err);
+      setError("Logout failed. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (loading) {
     return (
       <main className={styles.page}>
@@ -82,6 +101,14 @@ export default function Dashboard() {
             <Link href="/dashboard/categories" className={styles.navLink}>
               Categories
             </Link>
+            <button
+              type="button"
+              className={styles.logoutBtn}
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </button>
           </nav>
         </header>
 

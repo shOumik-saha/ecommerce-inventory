@@ -53,6 +53,21 @@
   font-weight: 700;
 }
 
+.logoutBtn {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #d84444;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logoutBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .grid {
   margin-top: 20px;
   display: grid;
