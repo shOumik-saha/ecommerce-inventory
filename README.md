@@ -111,20 +111,6 @@ Frontend runs on `http://localhost:3000`.
 - `CORS_ALLOWED_ORIGINS`
 - `CORS_ALLOWED_ORIGINS_PATTERNS`
 
-Recommended CORS values:
-
-```env
-CORS_ALLOWED_ORIGINS=http://localhost:3000,https://YOUR-PROD-VERCEL-DOMAIN.vercel.app
-CORS_ALLOWED_ORIGINS_PATTERNS=#^https://.*\.vercel\.app$#
-```
-
-After changing config in production:
-
-```bash
-php artisan config:clear
-php artisan cache:clear
-```
-
 ### Frontend (Vercel / `.env.local`)
 
 - `NEXT_PUBLIC_API_URL` (must point to backend `/api` base URL)
@@ -143,7 +129,7 @@ php artisan cache:clear
 1. Import the same repository.
 2. Set **Root Directory** to `frontend`.
 3. Add env:
-   - `NEXT_PUBLIC_API_URL=https://<your-backend>/api`
+   - `NEXT_PUBLIC_API_URL=https://ecommerce-inventory-production.up.railway.app/api`
 4. Deploy.
 
 ## Authentication
