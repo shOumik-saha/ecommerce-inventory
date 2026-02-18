@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiFetch } from "@/utils/fetcher";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-  const [data, setData] = useState<any>(null);
+  const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
-    apiFetch("/products")
-      .then((res) => setData(res))
-      .catch((err) => console.error(err));
-  }, []);
+    const localToken = localStorage.getItem("token");
+    if (token || localToken) {
+      router.replace("/dashboard");
+      return;
+    }
+    router.replace("/login");
+  }, [token, router]);
 
-  return (
-    <div>
-      <h1>Backend Test</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
+  return null;
 }
