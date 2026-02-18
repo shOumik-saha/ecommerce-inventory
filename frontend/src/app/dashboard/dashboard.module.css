@@ -1,0 +1,140 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 10%, #d9f0ff 0%, transparent 35%),
+    radial-gradient(circle at 90% 0%, #ffe8cf 0%, transparent 38%),
+    linear-gradient(140deg, #f7fafc 0%, #eef5ff 60%, #fff7ef 100%);
+  padding: 28px;
+  color: #122c46;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(18, 44, 70, 0.1);
+  box-shadow: 0 12px 30px rgba(18, 44, 70, 0.1);
+}
+
+.greeting {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: #4a6786;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.navLink {
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e8f2ff;
+  border: 1px solid #b8d5f8;
+  color: #11426f;
+  font-weight: 700;
+}
+
+.grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.card {
+  grid-column: span 6;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(18, 44, 70, 0.1);
+  box-shadow: 0 12px 32px rgba(18, 44, 70, 0.08);
+  padding: 22px;
+}
+
+.cardWide {
+  grid-column: span 12;
+}
+
+.kicker {
+  margin: 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: #5c7796;
+}
+
+.value {
+  margin: 8px 0;
+  font-size: 2rem;
+  color: #0f2d4d;
+}
+
+.body {
+  margin: 0;
+  color: #3d5c7c;
+}
+
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.primary {
+  color: #ffffff;
+  background: linear-gradient(120deg, #0d5ad2 0%, #1792ff 100%);
+}
+
+.soft {
+  color: #184d7f;
+  background: #e9f3ff;
+}
+
+.status {
+  margin-top: 12px;
+  color: #31567c;
+  font-weight: 600;
+}
+
+.error {
+  margin-top: 12px;
+  color: #be2727;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card {
+    grid-column: span 12;
+  }
+}
