@@ -92,16 +92,16 @@
 
 .split {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   gap: 16px;
 }
 
 .col5 {
-  grid-column: span 5;
+  min-width: 0;
 }
 
 .col7 {
-  grid-column: span 7;
+  min-width: 0;
 }
 
 .sectionTitle {
@@ -113,6 +113,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  align-items: start;
 }
 
 .span2 {
@@ -129,6 +130,8 @@
 .select,
 .textarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid #c7d9ed;
   border-radius: 10px;
   padding: 10px 12px;
@@ -270,7 +273,11 @@
 
   .col5,
   .col7 {
-    grid-column: span 12;
+    min-width: 0;
+  }
+
+  .split {
+    grid-template-columns: 1fr;
   }
 
   .formGrid {
