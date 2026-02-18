@@ -79,7 +79,7 @@ export default function Login() {
   return (
     <main className={styles.page}>
       <section className={styles.card}>
-        <h1 className={styles.title}>Welcome Back</h1>
+        <h1 className={styles.title}>Welcome!</h1>
         <p className={styles.subtitle}>Sign in to continue managing your inventory.</p>
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
